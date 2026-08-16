@@ -1,0 +1,3 @@
+{
+  "rewrites": [{ "source": "/api/(.*)", "destination": "https://couple-memory-map-api.onrender.com/api/$1" }]
+}
