@@ -1,9 +1,11 @@
 """Google Drive OAuth: lets a couple connect their Drive for photo storage."""
+import hmac
 import secrets
+from hashlib import sha256
 from urllib.parse import urlencode
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -16,16 +18,27 @@ router = APIRouter(prefix="/api/drive", tags=["drive"])
 
 SCOPES = "https://www.googleapis.com/auth/drive.file"
 
-# In-memory state store is enough: the redirect happens seconds after connect.
-_states: dict[str, int] = {}
+
+def _sign(user_id: int) -> str:
+    mac = hmac.new(settings.JWT_SECRET.encode(), f"drive:{user_id}".encode(), sha256).hexdigest()[:32]
+    return f"{user_id}.{mac}"
+
+
+def _verify(state: str) -> int:
+    user_id, _, mac = state.partition(".")
+    expected = hmac.new(settings.JWT_SECRET.encode(), f"drive:{user_id}".encode(), sha256).hexdigest()[:32]
+    if not hmac.compare_digest(mac, expected):
+        raise HTTPException(400, "Invalid OAuth state. Please try connecting again.")
+    return int(user_id)
 
 
 @router.get("/connect")
-def connect(user: User = Depends(get_current_user)):
+def connect(request: Request, user: User = Depends(get_current_user)):
+    # The frontend links here as a full navigation, so the JWT may arrive as
+    # ?token= instead of the Authorization header.
     if not settings.GOOGLE_CLIENT_ID:
-        raise HTTPException(400, "Google Drive is not configured on this server.")
-    state = secrets.token_urlsafe(24)
-    _states[state] = user.id
+        raise HTTPException(400, "Google Drive is not configured on this server. Set GOOGLE_CLIENT_ID/SECRET.")
+    state = _sign(user.id)
     params = urlencode(
         {
             "client_id": settings.GOOGLE_CLIENT_ID,
@@ -44,9 +57,7 @@ def connect(user: User = Depends(get_current_user)):
 def callback(code: str = "", state: str = "", error: str = ""):
     from ..database import SessionLocal
 
-    user_id = _states.pop(state, None)
-    if user_id is None:
-        raise HTTPException(400, "Unknown or expired OAuth state. Please try connecting again.")
+    user_id = _verify(state)
     if error or not code:
         raise HTTPException(400, f"Google Drive connection failed: {error or 'no code'}")
 

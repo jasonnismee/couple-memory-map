@@ -123,7 +123,7 @@ export default function MemoryForm({
       <textarea
         value={description ?? ''}
         onChange={(e) => setDescription(e.target.value)}
-        rows={5}
+        rows={12}
         placeholder="We walked around the lake, then went to a small cafe nearby…"
         className="mb-4 w-full resize-none rounded-xl border border-stone-200 px-3 py-2 text-sm outline-none focus:border-rose-400"
       />

@@ -185,7 +185,7 @@ function MapApp() {
               )}
               {!user.drive_connected && (
                 <a
-                  href={(import.meta.env.VITE_API_URL || '') + '/api/drive/connect'}
+                  href={`${(import.meta.env.VITE_API_URL || '') + '/api/drive/connect'}?token=${localStorage.getItem('token')}`}
                   className="mb-2 block rounded-full bg-stone-100 px-4 py-2 text-center text-xs font-medium hover:bg-stone-200"
                 >
                   Connect Google Drive for photos
