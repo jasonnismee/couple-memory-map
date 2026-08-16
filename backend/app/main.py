@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 from .database import Base, engine
-from .routers import auth, drive, memories
+from .routers import auth, drive, love, memories
 
 app = FastAPI(title="Couple Memory Map API")
 
@@ -28,6 +28,7 @@ def startup():
 app.include_router(auth.router)
 app.include_router(memories.router)
 app.include_router(drive.router)
+app.include_router(love.router)
 
 # Serve locally uploaded photos (dev / before Drive is connected).
 from .config import settings  # noqa: E402

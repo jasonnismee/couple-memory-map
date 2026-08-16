@@ -55,3 +55,12 @@ export interface SearchResult {
   lat: string
   lon: string
 }
+
+export interface LoveRequest {
+  id: number
+  from_user_id: number
+  from_user_name: string
+  to_email: string
+  status: string
+  created_at: string
+}

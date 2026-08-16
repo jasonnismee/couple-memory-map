@@ -69,3 +69,16 @@ class MemoryOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     photos: list[PhotoOut]
+
+
+class LoveRequestCreate(BaseModel):
+    to_email: EmailStr
+
+
+class LoveRequestOut(BaseModel):
+    id: int
+    from_user_id: int
+    from_user_name: str
+    to_email: str
+    status: str
+    created_at: datetime

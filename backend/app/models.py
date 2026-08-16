@@ -72,3 +72,16 @@ class MemoryPhoto(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
 
     memory = relationship("Memory", back_populates="photos")
+
+
+class LoveRequest(Base):
+    __tablename__ = "love_requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    couple_id: Mapped[int] = mapped_column(ForeignKey("couples.id"), index=True)
+    from_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    to_email: Mapped[str] = mapped_column(String(255), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending")  # pending/accepted/declined
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
+
+    from_user = relationship("User", foreign_keys=[from_user_id])
