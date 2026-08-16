@@ -9,7 +9,11 @@ class Settings:
     DATABASE_URL: str = os.environ.get("DATABASE_URL", "")
     FRONTEND_URL: str = os.environ.get("FRONTEND_URL", "http://localhost:5173")
 
-    UPLOAD_DIR: str = os.environ.get("UPLOAD_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads"))
+    # On Vercel serverless the filesystem is read-only except /tmp.
+    if os.environ.get("VERCEL"):
+        UPLOAD_DIR: str = os.environ.get("UPLOAD_DIR", "/tmp/uploads")
+    else:
+        UPLOAD_DIR: str = os.environ.get("UPLOAD_DIR", os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads"))
 
     GOOGLE_CLIENT_ID: str = os.environ.get("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET: str = os.environ.get("GOOGLE_CLIENT_SECRET", "")

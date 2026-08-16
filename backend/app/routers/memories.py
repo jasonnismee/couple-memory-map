@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session, joinedload
 from ..auth import get_current_user
@@ -120,6 +122,8 @@ def upload_photos(
     m = get_owned(memory_id, user, db)
     couple = db.get(Couple, user.couple_id)
     use_drive = bool(couple.drive_refresh_token)
+    if not use_drive and os.environ.get("VERCEL"):
+        raise HTTPException(400, "Photo storage requires Google Drive. Connect it in Settings (⚙️) first.")
     saved = []
     for f in files:
         content = f.file.read()
